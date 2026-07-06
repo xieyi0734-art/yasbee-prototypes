@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Statement — YASBee</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--gold:#E59303;--gold-light:rgba(229,147,3,0.08);--gold-mid:rgba(229,147,3,0.15);--bg:#f8f9fb;--sidebar-bg:#ffffff;--text:#1a1a2e;--text-muted:#5b5b70;--text-light:#9090a8;--border:#e8e8f0;--card-bg:#ffffff;--badge-bg:#f3f4f6;--radius:10px;--font:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,sans-serif}
+@media(prefers-color-scheme:dark){:root{--bg:#0a0a18;--sidebar-bg:#0f0f22;--text:#e8e8f0;--text-muted:#9090a8;--text-light:#6a6a80;--border:#1e1e32;--card-bg:#12122a;--badge-bg:#1a1a30}}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased}
+.app{display:flex;min-height:100vh}
+.sidebar{width:240px;background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sidebar-header{padding:20px 20px 16px;border-bottom:1px solid var(--border)}
+.sidebar-header .logo{font-size:20px;font-weight:700;letter-spacing:-0.3px;color:var(--text);text-decoration:none}
+.sidebar-header .logo span{color:var(--gold)}
+.sidebar-nav{padding:12px 10px;flex:1}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;font-size:14px;font-weight:500;color:var(--text-muted);cursor:pointer;transition:all .15s;text-decoration:none;margin-bottom:2px}
+.nav-item:hover{background:var(--gold-light);color:var(--text)}
+.nav-item.active{background:var(--gold-mid);color:var(--gold);font-weight:600}
+.nav-item .nav-icon{width:20px;height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);font-size:13px;color:var(--text-light)}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:60px;background:var(--card-bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;flex-shrink:0}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-left h1{font-size:20px;font-weight:600}
+.topbar-right{display:flex;align-items:center;gap:16px}
+.notif-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-muted);transition:all .15s}
+.notif-btn:hover{background:var(--gold-light);color:var(--gold)}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--gold);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px}
+.content{padding:24px 28px;flex:1;overflow-y:auto}
+/* Manual Generate Section */
+.manual-section{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:20px}
+.manual-section h3{font-size:15px;font-weight:600;margin-bottom:14px}
+.manual-form{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.manual-form .form-group{display:flex;flex-direction:column;gap:4px}
+.manual-form .form-group label{font-size:12px;color:var(--text-muted);font-weight:500}
+.manual-form select,.manual-form input{padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--card-bg);color:var(--text);outline:none;transition:border .15s;font-family:var(--font);min-width:140px}
+.manual-form select:focus,.manual-form input:focus{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-light)}
+.btn{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;font-family:var(--font)}
+.btn-gold{background:var(--gold);color:#fff;border:1px solid var(--gold)}
+.btn-gold:hover{opacity:0.9}
+.btn-outline{background:transparent;color:var(--text-muted);border:1px solid var(--border)}
+.btn-outline:hover{background:var(--gold-light);border-color:var(--gold);color:var(--text)}
+.btn-success{background:#059669;color:#fff;border:1px solid #059669}
+.btn-success:hover{opacity:0.9}
+/* History list */
+.history-wrap{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.history-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.history-header h3{font-size:15px;font-weight:600}
+.history-empty{padding:40px 20px;text-align:center;color:var(--text-light);font-size:14px}
+.history-item{display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid var(--border);transition:background .15s}
+.history-item:last-child{border-bottom:none}
+.history-item:hover{background:var(--gold-light)}
+.history-item .hi-month{flex-shrink:0;font-size:13px;font-weight:600;color:var(--text);margin-right:16px;white-space:nowrap}
+.history-item .hi-status{flex:1;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.history-item .hi-type-tag{padding:2px 10px;border-radius:12px;font-size:11px;font-weight:500}
+.hi-type-tag.fiat{background:#dbeafe;color:#1d4ed8}
+.hi-type-tag.crypto{background:#fef3c7;color:#b45309}
+.hi-type-tag.card{background:#d1fae5;color:#047857}
+.hi-type-tag.invest{background:#ede9fe;color:#6d28d9}
+.history-item .hi-summary{font-size:13px;color:var(--text-muted)}
+.history-item .hi-date{font-size:12px;color:var(--text-light);white-space:nowrap}
+.history-item .hi-dl-btn{border:none;background:none;cursor:pointer;color:var(--text-light);padding:6px;border-radius:6px;transition:all .15s;display:flex;align-items:center;gap:4px;font-size:13px;font-family:var(--font)}
+.history-item .hi-dl-btn:hover{background:var(--gold-light);color:var(--gold)}
+/* Pagination */
+.pagination{display:flex;align-items:center;justify-content:center;padding:14px 16px;gap:4px;border-top:1px solid var(--border)}
+.pag-btn{width:34px;height:34px;border-radius:6px;border:1px solid var(--border);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--text-muted);transition:all .15s;font-family:var(--font)}
+.pag-btn:hover{background:var(--gold-light);border-color:var(--gold);color:var(--text)}
+.pag-btn.active{background:var(--gold);color:#fff;border-color:var(--gold)}
+.pag-btn:disabled{opacity:0.4;cursor:default}
+.pag-btn.pag-nav{font-weight:600}
+.pag-info{font-size:12px;color:var(--text-light);margin-right:12px}
+/* Download Modal */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:auto}
+.modal{background:var(--card-bg);border-radius:14px;width:440px;max-width:90vw;padding:0;box-shadow:0 20px 60px rgba(0,0,0,0.15)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 0}
+.modal-header h3{font-size:18px;font-weight:600}
+.modal-close{width:32px;height:32px;border-radius:50%;border:none;background:var(--badge-bg);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-muted);font-size:18px}
+.modal-body{padding:20px 24px}
+.modal-body label{display:block;font-size:13px;font-weight:500;color:var(--text-muted);margin-bottom:6px}
+.modal-body .form-group{margin-bottom:16px}
+.radio-group{display:flex;gap:12px;flex-wrap:wrap}
+.radio-group label{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:400;color:var(--text);cursor:pointer;margin-bottom:0}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;padding:0 24px 20px}
+/* Toast */
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:12px 24px;border-radius:10px;font-size:14px;z-index:2000;opacity:0;transition:opacity .3s;box-shadow:0 4px 20px rgba(0,0,0,0.2);pointer-events:none}
+.toast.show{opacity:1}
+@media(max-width:768px){
+  .sidebar{display:none}
+  .manual-form{flex-direction:column;align-items:stretch}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="sidebar">
+<div class="sidebar-header"><a href="#" class="logo">YAS<span>Bee</span></a></div>
+<div class="sidebar-nav">
+<a href="#" class="nav-item"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span>Dashboard</a>
+<a href="#" class="nav-item active"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></span>Statement</a>
+<a href="#" class="nav-item"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>Cards</a>
+<a href="#" class="nav-item"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></span>Transfers</a>
+<a href="#" class="nav-item"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></span>Analytics</a>
+</div>
+<div class="sidebar-footer">&copy; 2026 YASBee</div>
+</div>
+<div class="main">
+<div class="topbar">
+<div class="topbar-left"><h1>Statement</h1></div>
+<div class="topbar-right">
+<button class="notif-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></button>
+<div class="avatar">DX</div>
+</div>
+</div>
+<div class="content">
+
+<!-- Manual Generate Section -->
+<div class="manual-section">
+<h3>Generate Statement</h3>
+<div class="manual-form">
+<div class="form-group">
+<label>Type</label>
+<select id="genType">
+<option value="fiat">Fiat</option>
+<option value="crypto">Crypto</option>
+<option value="card">Card Records</option>
+<option value="invest">Investment</option>
+</select>
+</div>
+<div class="form-group">
+<label>Date From</label>
+<input type="date" id="genDateFrom">
+</div>
+<div class="form-group">
+<label>Date To</label>
+<input type="date" id="genDateTo">
+</div>
+<button class="btn btn-gold" onclick="manualGenerate()">Generate</button>
+</div>
+</div>
+
+<!-- History List -->
+<div class="history-wrap">
+<div class="history-header">
+<h3>Statements</h3>
+<div style="display:flex;gap:8px">
+<select id="filterType" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:var(--card-bg);color:var(--text);outline:none;font-family:var(--font)">
+<option value="fiat">Fiat</option>
+<option value="crypto">Crypto</option>
+<option value="card">Card Records</option>
+<option value="invest">Investment</option>
+</select>
+</div>
+</div>
+<div id="historyList"></div>
+<div class="pagination" id="paginationWrap"></div>
+</div>
+
+</div>
+</div>
+</div>
+
+<!-- Download Modal -->
+<div class="modal-overlay" id="downloadModal">
+<div class="modal">
+<div class="modal-header"><h3>Download Statement</h3><button class="modal-close" onclick="closeDownloadModal()">&times;</button></div>
+<div class="modal-body">
+<div class="form-group"><label>Format</label><div class="radio-group"><label><input type="radio" name="dlFormat" value="csv" checked> CSV</label><label><input type="radio" name="dlFormat" value="xlsx"> XLSX</label><label><input type="radio" name="dlFormat" value="pdf"> PDF</label></div></div>
+<div class="form-group" id="dlInfo" style="background:var(--badge-bg);border-radius:8px;padding:12px;font-size:13px">
+<div style="margin-bottom:4px"><strong>Statement:</strong> <span id="dlItemType"></span></div>
+<div style="margin-bottom:4px"><strong>Period:</strong> <span id="dlItemPeriod"></span></div>
+<div><strong>Generated At:</strong> <span id="dlItemDate"></span></div>
+<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)"><strong>File:</strong> <span id="dlItemFilename" style="font-family:monospace;font-size:12px;color:var(--gold)"></span></div>
+</div>
+</div>
+<div class="modal-footer"><button class="btn btn-outline" onclick="closeDownloadModal()">Cancel</button><button class="btn btn-success" onclick="confirmDownload()">⬇ Download</button></div>
+</div>
+</div>
+
+<!-- Success Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+var statements = [];
+var PAGE_SIZE = 5;
+var currentPage = 1;
+
+function genId(){return 'STMT-' + Math.random().toString(36).substring(2,10).toUpperCase()}
+function formatDate(d){
+  var y = d.getFullYear();
+  var m = String(d.getMonth()+1).padStart(2,'0');
+  var dd = String(d.getDate()).padStart(2,'0');
+  return y + '-' + m + '-' + dd;
+}
+function formatDateTime(d){
+  var y = d.getFullYear();
+  var m = String(d.getMonth()+1).padStart(2,'0');
+  var dd = String(d.getDate()).padStart(2,'0');
+  var h = String(d.getHours()).padStart(2,'0');
+  var min = String(d.getMinutes()).padStart(2,'0');
+  var s = String(d.getSeconds()).padStart(2,'0');
+  return y + '-' + m + '-' + dd + ' ' + h + ':' + min + ':' + s;
+}
+function formatDateDisplay(d){
+  var opts = {year:'numeric',month:'short',day:'numeric'};
+  return d.toLocaleDateString('en-US',opts);
+}
+
+// Seed mock data: 5 months x 4 types = 20 statements
+;(function(){
+  var months = ['2026-01','2026-02','2026-03','2026-04','2026-05'];
+  var types = ['fiat','crypto','card','invest'];
+  var typeLabel = {fiat:'Fiat',crypto:'Crypto',card:'Card Records',invest:'Investment'};
+  var now = new Date();
+  months.forEach(function(m){
+    types.forEach(function(t){
+      var genDate = new Date(parseInt(m.split('-')[0]), parseInt(m.split('-')[1]) - 1 + 1, 2);
+      if(genDate > now) return;
+      var periodStart = new Date(parseInt(m.split('-')[0]), parseInt(m.split('-')[1]) - 1, 1);
+      var periodEnd = new Date(parseInt(m.split('-')[0]), parseInt(m.split('-')[1]), 0);
+      statements.push({
+        id: genId(),
+        type: t,
+        typeLabel: typeLabel[t],
+        month: m,
+        monthLabel: typeLabel[t] + '-' + m,
+        periodStart: formatDate(periodStart),
+        periodEnd: formatDate(periodEnd),
+        generatedAt: genDate,
+        generatedLabel: formatDateTime(genDate),
+        status: 'generated',
+        entries: Math.floor(Math.random() * 50) + 5,
+        totalAmount: (Math.random() * 50000 + 500).toFixed(2)
+      });
+    });
+  });
+  statements.sort(function(a,b){return b.generatedAt - a.generatedAt});
+})();
+// Set date inputs default to this month
+(function(){
+  var now = new Date();
+  var first = new Date(now.getFullYear(), now.getMonth(), 1);
+  var last = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  document.getElementById('genDateFrom').value = formatDate(first);
+  document.getElementById('genDateTo').value = formatDate(last);
+})();
+
+function showToast(msg){
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show')}, 2500);
+}
+
+function getFilteredData(){
+  var filterType = document.getElementById('filterType').value;
+  return statements.filter(function(s){
+    if(s.type !== filterType) return false;
+    return true;
+  });
+}
+
+function renderHistory(){
+  var filtered = getFilteredData();
+  var totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1;
+  if(currentPage > totalPages) currentPage = totalPages;
+
+  var start = (currentPage - 1) * PAGE_SIZE;
+  var pageData = filtered.slice(start, start + PAGE_SIZE);
+
+  var list = document.getElementById('historyList');
+  if(pageData.length === 0){
+    list.innerHTML = '<div class="history-empty">No statements found.</div>';
+  } else {
+    var html = '';
+    pageData.forEach(function(s){
+      var iconMap = {fiat:'💵',crypto:'₿',card:'💳',invest:'📈'};
+      var colorMap = {fiat:'fiat',crypto:'crypto',card:'card',invest:'invest'};
+      // Period display: "May 1 - May 31, 2026"
+      var pStart = new Date(s.periodStart);
+      var pEnd = new Date(s.periodEnd);
+      var periodStr = formatDateDisplay(pStart) + ' ‒ ' + formatDateDisplay(pEnd);
+      html += '<div class="history-item">'
+        + '<div class="hi-month">' + s.monthLabel + '</div>'
+        + '<div class="hi-status">'
+        + '<span class="hi-type-tag ' + colorMap[s.type] + '">' + s.typeLabel + '</span>'
+        + '<span class="hi-summary">' + s.entries + ' entries</span>'
+        + '</div>'
+        + '<div class="hi-date">' + s.generatedLabel + '</div>'
+        + '<button class="hi-dl-btn" onclick="openDownloadModal(\'' + s.id + '\')">⬇ Download</button>'
+        + '</div>';
+    });
+    list.innerHTML = html;
+  }
+
+  // Pagination
+  renderPagination(filtered.length, totalPages);
+}
+
+function renderPagination(totalItems, totalPages){
+  var wrap = document.getElementById('paginationWrap');
+  var html = '<span class="pag-info">' + totalItems + ' statement(s)</span>';
+
+  html += '<button class="pag-btn pag-nav" onclick="goToPage(1)"' + (currentPage <= 1 ? ' disabled' : '') + '>«</button>';
+  html += '<button class="pag-btn pag-nav" onclick="goToPage(' + (currentPage-1) + ')"' + (currentPage <= 1 ? ' disabled' : '') + '>‹</button>';
+
+  // Show page numbers with ellipsis
+  var rangeStart = Math.max(1, currentPage - 1);
+  var rangeEnd = Math.min(totalPages, currentPage + 1);
+  if(rangeStart > 1){
+    html += '<button class="pag-btn" onclick="goToPage(1)">1</button>';
+    if(rangeStart > 2) html += '<span class="pag-btn" style="border:none;cursor:default">…</span>';
+  }
+  for(var i = rangeStart; i <= rangeEnd; i++){
+    html += '<button class="pag-btn' + (i === currentPage ? ' active' : '') + '" onclick="goToPage(' + i + ')">' + i + '</button>';
+  }
+  if(rangeEnd < totalPages){
+    if(rangeEnd < totalPages - 1) html += '<span class="pag-btn" style="border:none;cursor:default">…</span>';
+    html += '<button class="pag-btn" onclick="goToPage(' + totalPages + ')">' + totalPages + '</button>';
+  }
+
+  html += '<button class="pag-btn pag-nav" onclick="goToPage(' + (currentPage+1) + ')"' + (currentPage >= totalPages ? ' disabled' : '') + '>›</button>';
+  html += '<button class="pag-btn pag-nav" onclick="goToPage(' + totalPages + ')"' + (currentPage >= totalPages ? ' disabled' : '') + '>»</button>';
+
+  wrap.innerHTML = html;
+}
+
+function goToPage(page){
+  var filtered = getFilteredData();
+  var totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1;
+  if(page < 1) page = 1;
+  if(page > totalPages) page = totalPages;
+  currentPage = page;
+  renderHistory();
+}
+
+function manualGenerate(){
+  var type = document.getElementById('genType').value;
+  var fromStr = document.getElementById('genDateFrom').value;
+  var toStr = document.getElementById('genDateTo').value;
+
+  if(!fromStr || !toStr){
+    alert('Please select both From and To dates.');
+    return;
+  }
+
+  var fromDate = new Date(fromStr + 'T00:00:00');
+  var toDate = new Date(toStr + 'T00:00:00');
+
+  if(fromDate > toDate){
+    alert('"From" date must be before or equal to "To" date.');
+    return;
+  }
+
+  var typeLabelMap = {fiat:'Fiat',crypto:'Crypto',card:'Card Records',invest:'Investment'};
+
+  var count = 0;
+  var cur = new Date(fromDate);
+  var seenKeys = {};
+
+  // Walk month by month within the date range
+  while(cur <= toDate){
+    var m = cur.getFullYear() + '-' + String(cur.getMonth() + 1).padStart(2,'0');
+    var key = m + '_' + type;
+
+    // Check if already exists
+    if(!statements.some(function(s){return s.month === m && s.type === type})){
+      if(!seenKeys[key]){
+        var monthStart = new Date(cur.getFullYear(), cur.getMonth(), 1);
+        var monthEnd = new Date(cur.getFullYear(), cur.getMonth() + 1, 0);
+        statements.push({
+          id: genId(),
+          type: type,
+          typeLabel: typeLabelMap[type],
+          month: m,
+          monthLabel: typeLabelMap[type] + '-' + m,
+          periodStart: formatDate(monthStart),
+          periodEnd: formatDate(monthEnd),
+          generatedAt: new Date(),
+          generatedLabel: formatDateTime(new Date()),
+          status: 'generated',
+          entries: Math.floor(Math.random() * 50) + 5,
+          totalAmount: (Math.random() * 50000 + 500).toFixed(2)
+        });
+        count++;
+        seenKeys[key] = true;
+      }
+    }
+    cur.setMonth(cur.getMonth() + 1);
+  }
+
+  statements.sort(function(a,b){return b.generatedAt - a.generatedAt});
+  currentPage = 1;
+  renderHistory();
+
+  if(count > 0){
+    showToast('✓ ' + count + ' statement(s) generated successfully');
+  } else {
+    showToast('Statements already exist for the selected period');
+  }
+}
+
+function getFilename(s, format){
+  var extMap = {csv:'csv', xlsx:'xlsx', pdf:'pdf'};
+  var ext = extMap[format] || 'csv';
+  var monthPart = s.periodStart;
+  return s.type + '_' + monthPart + '.' + ext;
+}
+
+function openDownloadModal(id){
+  var s;
+  for(var i=0;i<statements.length;i++){
+    if(statements[i].id === id){s = statements[i]; break;}
+  }
+  if(!s) return;
+  document.getElementById('dlItemType').textContent = s.typeLabel;
+  var pStart = new Date(s.periodStart);
+  var pEnd = new Date(s.periodEnd);
+  document.getElementById('dlItemPeriod').textContent = formatDateDisplay(pStart) + ' ‒ ' + formatDateDisplay(pEnd);
+  document.getElementById('dlItemDate').textContent = s.generatedLabel;
+  // Show filename for default format (CSV)
+  var defaultFormat = document.querySelector('input[name="dlFormat"]:checked').value;
+  document.getElementById('dlItemFilename').textContent = getFilename(s, defaultFormat);
+  document.getElementById('downloadModal').dataset.itemId = id;
+  document.getElementById('downloadModal').classList.add('open');
+}
+
+function closeDownloadModal(){
+  document.getElementById('downloadModal').classList.remove('open');
+}
+
+function confirmDownload(){
+  var id = document.getElementById('downloadModal').dataset.itemId;
+  var format = document.querySelector('input[name="dlFormat"]:checked').value;
+  closeDownloadModal();
+  showToast('⬇ ' + format.toUpperCase() + ' download started');
+}
+
+// Update filename preview when format changes
+document.querySelectorAll('input[name="dlFormat"]').forEach(function(radio){
+  radio.addEventListener('change', function(){
+    var id = document.getElementById('downloadModal').dataset.itemId;
+    if(!id) return;
+    var s;
+    for(var i=0;i<statements.length;i++){
+      if(statements[i].id === id){s = statements[i]; break;}
+    }
+    if(!s) return;
+    var format = document.querySelector('input[name="dlFormat"]:checked').value;
+    document.getElementById('dlItemFilename').textContent = getFilename(s, format);
+  });
+});
+
+// Filter change events
+document.getElementById('filterType').addEventListener('change', function(){
+  currentPage = 1;
+  renderHistory();
+});
+
+// Click overlay to close
+document.getElementById('downloadModal').addEventListener('click', function(e){
+  if(e.target === this) closeDownloadModal();
+});
+
+renderHistory();
+</script>
+</body>
+</html>
